@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from typing import List, Dict, Any
 
 # REFAC: Define constants at the top level for clarity and easy modification.
-PATTERNS = ['bursty', 'weekly', 'monthly', 'lurker_active', 'weekend', 'random', 'daily', 'weekday_warrior']
+PATTERNS = ['bursty', 'weekly', 'monthly', 'lurker_active', 'weekender', 'random', 'daily', 'weekday_warrior']
 PATTERN_WEIGHTS = [15, 20, 10, 10, 15, 10, 10, 10] # Weights for random selection
 
 class ForumUser:
@@ -29,43 +29,43 @@ class ForumUser:
         calendar = {}
         if self.pattern == 'bursty':
             # Bursts of high activity every 2-4 months
-            for i in range(0, simulation_days, random.randint(60, 120)):
-                for j in range(random.randint(3, 7)): # A burst lasts 3-7 days
+            for i in range(0, simulation_days, random.randint(60, 120)): # A new burst of activity starts every 60 to 120 days (i.e., every 2 to 4 months).
+                for j in range(random.randint(3, 7)): # numbers are represented by days. A burst lasts 3-7 days
                     if (i+j) < simulation_days:
                         day = start_date + timedelta(days=i+j)
-                        calendar[day] = random.randint(2, 6) # Higher activity during bursts
+                        calendar[day] = random.randint(2, 6) # each day during bursts, 2-6 number of comments per burst.
         elif self.pattern == 'weekly':
             # Posts once a week on a random day of the week
-            weekday = random.randint(0, 6)
+            weekday = random.randint(0, 6) # The user picks one specific day of the week (0=Monday, 6=Sunday) and sticks to it for the entire simulation. For example, they might become a "Tuesday poster."
             for i in range(simulation_days):
                 day = start_date + timedelta(days=i)
                 if day.weekday() == weekday:
-                    calendar[day] = random.randint(1, 2)
+                    calendar[day] = random.randint(1, 2) # On their chosen day each week, they will post 1 or 2 comments.
         elif self.pattern == 'monthly':
             # Posts once a month on a random day
             for i in range(0, simulation_days, 30):
-                day_offset = random.randint(0, 29)
+                day_offset = random.randint(0, 29) # posts once within every 30-day period, but on a random day within that month.
                 if (i + day_offset) < simulation_days:
                     day = start_date + timedelta(days=i + day_offset)
-                    calendar[day] = random.randint(1, 3)
+                    calendar[day] = random.randint(1, 3) # When they do post, they make 1 to 3 comments.
         elif self.pattern == 'lurker_active':
             # Becomes active in the latter half of the simulation period
-            activation_start = random.randint(simulation_days // 2, max(simulation_days // 2, simulation_days - 30))
-            for i in range(activation_start, min(activation_start + random.randint(14, 30), simulation_days)):
+            activation_start = random.randint(simulation_days // 2, max(simulation_days // 2, simulation_days - 30)) # The user does nothing for the first half of the simulation. Their activity begins at a random point in the second half.
+            for i in range(activation_start, min(activation_start + random.randint(14, 30), simulation_days)): # Their period of activity lasts for 14 to 30 days (2 to 4 weeks).
                 day = start_date + timedelta(days=i)
-                calendar[day] = random.randint(2, 5)
-        elif self.pattern == 'weekend':
+                calendar[day] = random.randint(2, 5) # During their active phase, they post 2 to 5 comments per day.
+        elif self.pattern == 'weekender':
             for i in range(simulation_days):
                 day = start_date + timedelta(days=i)
                 if day.weekday() >= 5: # Saturday or Sunday
-                    calendar[day] = random.randint(1, 3)
+                    calendar[day] = random.randint(1, 3) # number of comments
                 elif random.random() < 0.05: # 5% chance of a random weekday post
                     calendar[day] = 1
         elif self.pattern == 'weekday_warrior':
             for i in range(simulation_days):
                 day = start_date + timedelta(days=i)
                 if day.weekday() < 5: # Monday to Friday
-                    calendar[day] = random.randint(1, 2)
+                    calendar[day] = random.randint(1, 2) # 1-2 number of comments
         elif self.pattern == 'random':
             # REFAC: Correctly calculate total actions based on monthly rate and simulation duration.
             total_months = simulation_days / 30.44  # Average days in a month
@@ -81,7 +81,7 @@ class ForumUser:
             for i in range(simulation_days):
                 if random.random() < 0.8:  # 80% chance to post each day
                     day = start_date + timedelta(days=i)
-                    calendar[day] = random.randint(1, 2)
+                    calendar[day] = random.randint(1, 2) # 1-2 number of comments
         
         self.calendar = calendar
 
